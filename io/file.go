@@ -1,11 +1,13 @@
 package io
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -17,11 +19,11 @@ func (e Encoding) String() string {
 	return string(e)
 }
 
-const(
+const (
 	EncodingUnknown = Encoding("")
-	EncodingYaml = Encoding("yaml")
-	EncodingXml = Encoding("xml")
-	EncodingJson = Encoding("json")
+	EncodingYaml    = Encoding("yaml")
+	EncodingXml     = Encoding("xml")
+	EncodingJson    = Encoding("json")
 )
 
 var EncodingList = "json, yaml, xml"
@@ -67,6 +69,26 @@ func saveFileBytes(file string, data []byte, perm os.FileMode) error {
 	return err
 }
 
+func getReaderFrom(file string) io.Reader {
+	if fi, err := os.Stat(file); err == nil && !fi.IsDir() {
+		f, errF := os.Open(file)
+		if errF == nil {
+			return f
+		}
+	}
+	return nil
+}
+
+func getWriterFrom(file string, perm os.FileMode) io.Writer {
+	if fi, err := os.Stat(file); err != nil && !fi.IsDir() {
+		f, errF := os.OpenFile(file, os.O_WRONLY, perm)
+		if errF == nil {
+			return f
+		}
+	}
+	return nil
+}
+
 // Load Configuration from given file
 func ReadConfig(enc Encoding, file string, config interface{}) error {
 	var err error
@@ -95,6 +117,30 @@ func ReadConfig(enc Encoding, file string, config interface{}) error {
 	default:
 		err = errors.New(fmt.Sprintf("Unknown encoding format: %v", enc))
 	}
+	return err
+}
+
+// Load Configuration from given file
+func ReadNative(file string, config interface{}) error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("%v", r))
+		}
+	}()
+	err = gob.NewDecoder(getReaderFrom(file)).Decode(&config)
+	return err
+}
+
+// Load Configuration from given file
+func SaveNative(file string, config interface{}) error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("%v", r))
+		}
+	}()
+	err = gob.NewEncoder(getWriterFrom(file, 0777)).Encode(&config)
 	return err
 }
 

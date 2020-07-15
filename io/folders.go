@@ -10,7 +10,7 @@ import (
 func GetDefaultConfigFile(enc Encoding) (string, error) {
 	var err error
 	var dir = fmt.Sprintf("%s%c%s", HomeFolder(), os.PathSeparator, ".go-cron")
-	if ! FileExists(dir) {
+	if !FileExists(dir) {
 		err = CreateFolder(dir, 0777)
 		if err != nil {
 			return dir, err
@@ -56,11 +56,23 @@ func CreateFilePath(path string, perm os.FileMode) (string, error) {
 	return dir, err
 }
 
-
 func CreateFolder(dir string, perm os.FileMode) error {
 	var err error
 	if _, err = os.Stat(dir); err != nil {
 		err = os.MkdirAll(dir, perm)
+	}
+	return err
+}
+
+func DeleteFile(file string) error {
+	var err error
+	var fi os.FileInfo
+	if fi, err = os.Stat(file); err == nil {
+		if fi.IsDir() {
+			err = os.RemoveAll(file)
+		} else {
+			err = os.Remove(file)
+		}
 	}
 	return err
 }

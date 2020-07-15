@@ -20,6 +20,16 @@ func ListContains(target interface{}, list interface{}) (bool, int) {
 	return false, -1
 }
 
+func FilterGenericList(list []interface{}, match func(i interface{}) bool) []interface{} {
+	var out = make([]interface{}, 0)
+	for _, val := range list {
+		if match(val) {
+			out = append(out, val)
+		}
+	}
+	return out
+}
+
 func ListMatchContains(list []interface{}, match func(i interface{}) bool) (bool, int) {
 	for idx, val := range list {
 		if match(val) {
