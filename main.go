@@ -12,60 +12,101 @@ import (
 
 var fl *flag.FlagSet
 var command string
-var help string
-var configPath string
-var encoding io.Encoding
-var encodingString string
+var subCommand string
 
+var Args []string
 func init() {
-	fl = flag.NewFlagSet("go-cron", flag.ContinueOnError)
-	fl.StringVar(&command, "command", "", fmt.Sprintf("Requested Command (available: %v)", cron.Commands))
-	fl.StringVar(&help, "help", "", fmt.Sprintf("Help for Command (available: %v)", cron.Commands[1:]))
-	var defaultEncoding = io.DefaultEncodingFormat
-	fl.StringVar(&encodingString, "format", defaultEncoding.String(), fmt.Sprintf("File encoding format (available: %s)", io.EncodingList))
-	defaultFile, _ := io.GetDefaultConfigFile(defaultEncoding)
-	fl.StringVar(&configPath, "path", defaultFile, "Configuration file location")
-}
-
-func printExplainHelp() {
-	fmt.Printf("System Scheduler command, for argument details please type command: help <command-name>\n")
-	fmt.Printf("List of available command names: %s\n", cron.Commands)
-	fmt.Println()
+	Args = os.Args[1:]
+	cron.Args = os.Args[2:]
 }
 
 func main() {
-	var err = fl.Parse(os.Args[1:])
-	if err != nil {
-		fmt.Printf("Error occured during parse: %v\n", err)
-		printExplainHelp()
-		fl.Usage()
-		os.Exit(1)
+	if len(Args) == 0 {
+		fmt.Printf("Missing command argument, available commands: %v\n", cron.Commands)
+		cron.PrintHelp(cron.DefaultParser(command))
+
 	}
+	command = strings.ToLower(Args[0])
 	if b, _ := utils.ListContains(command, cron.Commands); ! b {
 		fmt.Printf("Command '%s' not in list : %v\n", command, cron.Commands)
-		printExplainHelp()
+		cron.PrintHelp(cron.DefaultParser(command))
 		fl.Usage()
 		os.Exit(2)
 	}
-	if encoding = io.EncodingFromValue(encodingString); encoding != io.EncodingUnknown {
-		var commandArg = strings.ToLower(command)
-		if "help" == commandArg {
-			if "help" == strings.ToLower(help) {
-				printExplainHelp()
-			}
-			cron.Help(help, fl)
-		} else {
-			err = cron.Exec(commandArg, configPath, encoding)
-			if err != nil {
-				fmt.Printf("Error during execution of the command <%s>\n", commandArg)
-			} else {
-				fmt.Printf("Command %s execution completed!!\n", commandArg)
-			}
+	if command == "help" {
+		if len(Args) < 2 {
+			fmt.Printf("Missing command help command argument, available commands: %v\n", cron.Commands[1:])
+			cron.PrintHelp(cron.DefaultParser(command))
+
 		}
+		subCommand = strings.ToLower(Args[1])
+		cron.Args = os.Args[3:]
+		cron.Help(command, subCommand)
+	} else if command == "explain" {
+		if len(Args) < 2 {
+			fmt.Printf("Missing command help command argument, available commands: %v\n", cron.Commands[1:])
+			cron.PrintHelp(cron.DefaultParser(command))
+
+		}
+		subCommand = strings.ToLower(Args[1])
+		cron.Args = os.Args[3:]
+		cron.Explain(command, subCommand)
 	} else {
-		fmt.Printf("Encoding '%s' unknown\n", encodingString)
-		printExplainHelp()
-		fl.Usage()
-		os.Exit(3)
+		err := cron.Exec(command)
+		if err != nil {
+			cron.LogMany("Error execution command %s, Error: %v", command, err)
+		}
 	}
+}
+
+func testTextSummary() {
+	var str = struct {
+		Name		string
+		Surname		string
+		Age			int
+		ContactData		interface{}
+		Id			int
+	}{
+		"Fabrizio",
+		"Torelli",
+		45,
+		struct{
+			Tel		string
+			Email	string
+		}{
+			"+353834841333",
+			"hellgate75@gmail.com",
+		},
+		1,
+	}
+	var str2 = struct {
+		Name		string
+		Surname		string
+		Age			int
+		ContactData		interface{}
+		Id			int
+	}{
+		"Eleonora",
+		"Mori",
+		43,
+		struct{
+			Tel		string
+			Email	string
+		}{
+			"+353838983428",
+			"eleonoraleanore77@gmail.com",
+		},
+		2,
+	}
+//	data, err := io.EncodeTextFormatSummary(str)
+	var in = make([]interface{}, 0)
+	in = append(in, str)
+	in = append(in, str2)
+	data, err := io.EncodeTextFormatSummary(in)
+	if err == nil {
+		fmt.Println(string(data))
+	} else {
+		fmt.Printf("Error: %v", err)
+	}
+	//fmt.Println("Name", io.formatColumn("myNameIsFabrizio"))
 }
