@@ -68,13 +68,24 @@ func parse(fl *flag.FlagSet) error {
 	return nil
 }
 
+func getExplainCommandArgsParser() *flag.FlagSet {
+	var fl  = DefaultParser("daemon")
+	fl.BoolVar(&details, "details", false, "Show details for each scheduler next execution processes, in the requested encoding format")
+	fl.StringVar(&inputFormat,"in-form", io.DefaultEncodingFormatString, fmt.Sprintf("Input encoding format (available: %s)", io.EncodingList))
+	fl.StringVar(&outputFormat, "out-form", io.DefaultEncodingFormatString, fmt.Sprintf("Output encoding format (available: text, %s)", io.EncodingList))
+	fl.BoolVar(&nativeGobInFile, "native-in", false, "Use native Gob file for input")
+	fl.BoolVar(&nativeGobOutFormat, "native-out", false, "Use native Gob format for output")
+	return fl
+}
+
+
 func getDaemonCommandArgsParser() *flag.FlagSet {
 	var fl  = DefaultParser("daemon")
 	return fl
 }
 
 func getOnceCommandArgsParser() *flag.FlagSet {
-	var fl  = DefaultParser("once")
+	var fl  = DefaultParser("explain")
 	return fl
 }
 

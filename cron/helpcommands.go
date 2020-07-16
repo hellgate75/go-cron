@@ -40,7 +40,7 @@ func helpHelpHelp() {
 }
 
 func helpExplainHelp() {
-	var fl  = DefaultParser(command)
+	var fl  = getExplainCommandArgsParser()
 	fmt.Printf("Request Help explain for %v commands.\n", Commands[4:])
 	fl.Usage()
 }
