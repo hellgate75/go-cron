@@ -73,6 +73,11 @@ func getDaemonCommandArgsParser() *flag.FlagSet {
 	return fl
 }
 
+func getOnceCommandArgsParser() *flag.FlagSet {
+	var fl  = DefaultParser("once")
+	return fl
+}
+
 func getAddCommandArgsParser() *flag.FlagSet {
 	var fl  = DefaultParser("add")
 	fl.StringVar(&inputFormat,"in-form", io.DefaultEncodingFormatString, fmt.Sprintf("Input encoding format (available: %s)", io.EncodingList))

@@ -12,6 +12,8 @@ func Help(command string, subCommand string) {
 		helpExplainHelp()
 	case "daemon":
 		helpDaemonCommand()
+	case "once":
+		helpOnceCommand()
 	case "add":
 		helpAddCommand()
 	case "remove":
@@ -39,13 +41,19 @@ func helpHelpHelp() {
 
 func helpExplainHelp() {
 	var fl  = DefaultParser(command)
-	fmt.Printf("Request Help explain for %v commands.\n", Commands[3:])
+	fmt.Printf("Request Help explain for %v commands.\n", Commands[4:])
 	fl.Usage()
 }
 
 func helpDaemonCommand() {
 	var fl  = getDaemonCommandArgsParser()
 	fmt.Printf("Start scheduler as daemon, in sync mode\n")
+	fl.Usage()
+}
+
+func helpOnceCommand() {
+	var fl  = getOnceCommandArgsParser()
+	fmt.Printf("Start scheduler as one-shot run, in sync mode\n")
 	fl.Usage()
 }
 

@@ -10,10 +10,18 @@ import (
 	"time"
 )
 
-var Commands = []string{"help", "explain", "daemon", "add", "remove", "update", "list", "active", "next"}
+var Commands = []string{"help", "explain", "daemon", "once", "add", "remove", "update", "list", "active", "next"}
+
+func header() string {
+	return "[" + time.Now().String() + " LOG ] "
+}
 
 func LogObj(d interface{}) {
-	fmt.Printf("%v\n", d)
+	if silent {
+		fmt.Printf("%v\n", d)
+	} else {
+		fmt.Printf("%s%v\n", header(), d)
+	}
 }
 
 func LogText(s string) {
@@ -21,7 +29,11 @@ func LogText(s string) {
 }
 
 func LogMany(format string, d ...interface{}) {
-	fmt.Printf(format, d)
+	if silent {
+		fmt.Printf(format, d)
+	} else {
+		fmt.Printf("%s%s\n", header(), fmt.Sprintf(format, d))
+	}
 }
 
 
@@ -79,6 +91,8 @@ func Exec(command string) error {
 	switch command {
 	case "daemon":
 		return executeDaemonCommand()
+	case "once":
+		return executeOnceCommand()
 	case "add":
 		return executeAddCommand()
 	case "remove":
@@ -132,6 +146,43 @@ func executeDaemonCommand() error {
 		return err
 	}
 	scheduler.Wait()
+	return err
+}
+
+
+func executeOnceCommand() error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("%v", r))
+		}
+	}()
+	//TODO: Implement logger for the once execution
+	err = parse(getOnceCommandArgsParser())
+	if err != nil {
+		return err
+	}
+	var scheduler model.Scheduler
+	if configPath == "" {
+		configPath = fmt.Sprintf("%s%c%s/%s.%s", io.HomeFolder(), os.PathSeparator, ",go-cron", "scheduler", encoding.String())
+		scheduler, err = NewEmptyScheduler(configPath, encoding, false)
+		if err != nil {
+			return err
+		}
+	} else {
+		scheduler, err = LoadSchedulerFrom(configPath, encoding, false)
+		if err != nil {
+			return err
+		}
+		err = scheduler.Load()
+		if err != nil {
+			return err
+		}
+	}
+	err = scheduler.RunOnce()
+	if err != nil {
+		return err
+	}
 	return err
 }
 

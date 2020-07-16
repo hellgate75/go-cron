@@ -65,40 +65,51 @@ func (e Execution) Expired() bool {
 
 // Update Command time table and calculate Next Execution
 func (e Execution) UpdateNext() {
-	if ! e.Scheduled {
-		c := e.Command
+	c := e.Command
+	if ! e.Scheduled || c.OnDemand {
 		if c.OnDemand {
-			e.Last = time.Now()
-			e.Next = time.Now().Add(20 * time.Second)
+			if c.Repeat > 0 && e.Times > c.Repeat {
+				e.Scheduled = false
+				e.Last = time.Now().Add(-20 * time.Minute)
+				e.Next = time.Now().Add(-20 * time.Minute)
+			} else {
+				e.Last = time.Now()
+				e.Next = time.Now().Add(2 * time.Second)
+			}
 		} else {
-			if c.Period != "" {
-				d, err := time.ParseDuration(c.Period)
-				if err == nil {
-					if time.Since(c.Since).Nanoseconds() > 0 {
-						if e.Last.Sub(c.Since).Nanoseconds() > 0 {
-							e.Next = c.Since
+			if c.Repeat > 0 && e.Times > c.Repeat {
+				e.Scheduled = false
+				e.Next = e.Last
+			} else {
+				if c.Period != "" {
+					d, err := time.ParseDuration(c.Period)
+					if err == nil {
+						if time.Since(c.Since).Nanoseconds() > 0 {
+							if e.Last.Sub(c.Since).Nanoseconds() > 0 {
+								e.Next = c.Since
+							} else {
+								e.Next = e.Last.Add(d)
+							}
 						} else {
 							e.Next = e.Last.Add(d)
 						}
 					} else {
-						e.Next = e.Last.Add(d)
+						e.Next = e.Last
 					}
-				} else {
-					e.Next = e.Last
-				}
-			} else if c.Repeat > 0 {
-				if e.Times <= c.Repeat {
-					if time.Since(c.Since).Nanoseconds() > 0 {
-						if e.Last.Sub(c.Since).Nanoseconds() > 0 {
-							e.Next = c.Since
+				} else if c.Repeat > 0 {
+					if e.Times <= c.Repeat {
+						if time.Since(c.Since).Nanoseconds() > 0 {
+							if e.Last.Sub(c.Since).Nanoseconds() > 0 {
+								e.Next = c.Since
+							} else {
+								e.Next = time.Now().Add(20 * time.Second)
+							}
 						} else {
 							e.Next = time.Now().Add(20 * time.Second)
 						}
 					} else {
-						e.Next = time.Now().Add(20 * time.Second)
+						e.Next = e.Last
 					}
-				} else {
-					e.Next = e.Last
 				}
 			}
 		}
@@ -107,6 +118,11 @@ func (e Execution) UpdateNext() {
 }
 
 func (e Execution) NeedScheduling() bool {
+	c := e.Command
+	if c.Repeat > 0 && e.Times > c.Repeat {
+		e.Scheduled = false
+		return false
+	}
 	e.UpdateNext()
 	return ! e.Scheduled && time.Since(e.Next).Nanoseconds() >= 0
 }
