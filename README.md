@@ -54,7 +54,7 @@ Available commands are:
 * `next`: List next execution of active commands in numerous output formats
 
 Optional command arguments [`add`,`remove`,`update`]:
-* `in-format` (string) - Encoding file for input (text or file) [available: text, json, xml, yaml] 
+* `in-format` (string) - Encoding input format (text or file) [available: `json`, `xml`, `yaml`]
 * `native-in` (bool) - Native GOB input (text or file) encoding format
 
 Optional command arguments [`list`,`active`,`next`]:
@@ -81,7 +81,7 @@ Available commands are:
 #### Base command arguments
 
 Base command line arguments are:
-* `format` (string) - Encoding file for output [available: json, xml, yaml] 
+* `format` (string) - Encoding file format [available: `json`, `xml`, `yaml`] 
 * `path` (string) - Configuration file location 
 * `silent` (bool) - Execute less details output for command execution 
 
@@ -103,79 +103,103 @@ Specific command line arguments are:
 
 #### Add command
 
-Add a command to the scheduler, accordingly to required base and specific arguments.
+Add a command to the scheduler, accordingly to required base (all mandatory arguments) and specific arguments.
+
+```
+go-cron add [-arg0=value0] [-arg1=value1] ...  [-argN=valueN]
+```
 
 Specific command line arguments are:
-* `in-format` (string) - Encoding file for input (text or file) [available: text, json, xml, yaml] 
+* `in-format` (string) - Encoding input format (text or file) [available: `json`, `xml`, `yaml`]
 * `native-in` (bool) - Native GOB input (text or file) encoding format
 * `in-file` (string) - Input file absolute path
 * `in-text` (sting) - Input text value
-* `out-format` (string) - Encoding file for output [available: text, json, xml, yaml] 
+* `out-format` (string) - Encoding output format [available: `text`, `json`, `xml`, `yaml`]
 * `native-out` (bool) - Native GOB output encoding format
 
 
 #### Remove command
 
-Remove an existing command in the scheduler at a specific index or in range of indexes, accordingly to required base and specific arguments. Index is the line number of the `list` command.
+Remove an existing command in the scheduler at a specific index or in range of indexes, accordingly to required base (all mandatory arguments) and specific arguments. Index is the line number of the `list` command.
+
+```
+go-cron remove [-arg0=value0] [-arg1=value1] ...  [-argN=valueN]
+```
 
 Specific command line arguments are:
 * `index` (int) - Output list raw line number to be deleted (1..n)
 * `from` (int) - Output list raw first line number to be deleted (1..n)
 * `to` (int) - Output list raw last line number to be deleted (1..n)
-* `out-format` (string) - Encoding file for output [available: text, json, xml, yaml] 
+* `out-format` (string) - Encoding output format [available: `text`, `json`, `xml`, `yaml`]
 * `native-out` (bool) - Native GOB output encoding format
 
 
 #### Update command
 
-Update an existing command in the scheduler at a specific index, accordingly to required base and specific arguments. Index is the line number of the `list` command.
+Update an existing command in the scheduler at a specific index, accordingly to required base (all mandatory arguments) and specific arguments. Index is the line number of the `list` command.
+
+```
+go-cron update [-arg0=value0] [-arg1=value1] ...  [-argN=valueN]
+```
 
 Specific command line arguments are:
 * `index` (int) - Output list raw line number to be deleted (1..n)
-* `in-format` (string) - Encoding file for input (text or file) [available: text, json, xml, yaml] 
+* `in-format` (string) - Encoding input format (text or file) [available: `json`, `xml`, `yaml`]
 * `native-in` (bool) - Native GOB input (text or file) encoding format
 * `in-file` (string) - Input file absolute path
 * `in-text` (sting) - Input text value
-* `out-format` (string) - Encoding file for output [available: text, json, xml, yaml] 
+* `out-format` (string) - Encoding output format [available: `text`, `json`, `xml`, `yaml`]
 * `native-out` (bool) - Native GOB output encoding format
 
 
 #### List command
 
-Show the list of saved or cached command configurations, in numerous output encoding format.
+Show the list of saved or cached command configurations with base (all mandatory arguments) and specific arguments, in numerous output encoding format.
+
+```
+go-cron list [-arg0=value0] [-arg1=value1] ...  [-argN=valueN]
+```
 
 Specific command line arguments are:
-* `query` (sting) - Comma separated <column name>=<value> keys (*not implemented*)
+* `query` (sting) - Comma separated column_name=value key pairs (*not implemented*)
 * `filter` (sting) - Go style template output filter template text (*not implemented*)
 * `filter-file` (sting) - Go style template output filter template template (*not implemented*)
 * `details` (bool) - Show detailed output format
-* `out-format` (string) - Encoding file for output [available: text, json, xml, yaml] 
+* `out-format` (string) - Encoding output format [available: `text`, `json`, `xml`, `yaml`]
 * `native-out` (bool) - Native GOB output encoding format
 
 
 #### Active command
 
-Show the list of active/running command execution data, in numerous output encoding format.
+Show the list of active/running command execution data with base (all mandatory arguments) and specific arguments, in numerous output encoding format.
+
+```
+go-cron active [-arg0=value0] [-arg1=value1] ...  [-argN=valueN]
+```
 
 Specific command line arguments are:
-* `query` (sting) - Comma separated <column name>=<value> keys (*not implemented*)
+* `query` (sting) - Comma separated column_name=value key pairs (*not implemented*)
 * `filter` (sting) - Go style template output filter template text (*not implemented*)
 * `filter-file` (sting) - Go style template output filter template template (*not implemented*)
 * `details` (bool) - Show detailed output format
-* `out-format` (string) - Encoding file for output [available: text, json, xml, yaml] 
+* `out-format` (string) - Encoding output format [available: `text`, `json`, `xml`, `yaml`]
 * `native-out` (bool) - Native GOB output encoding format
 
 
 #### Next command
 
-Show the list of next running command execution data, in numerous output encoding format.
+Show the list of next running command execution data with base (all mandatory arguments) and specific arguments, in numerous output encoding format.
+
+```
+go-cron next [-arg0=value0] [-arg1=value1] ...  [-argN=valueN]
+```
 
 Specific command line arguments are:
-* `query` (sting) - Comma separated <column name>=<value> keys (*not implemented*)
+* `query` (sting) - Comma separated column_name=value key pairs (*not implemented*)
 * `filter` (sting) - Go style template output filter template text (*not implemented*)
 * `filter-file` (sting) - Go style template output filter template template (*not implemented*)
 * `details` (bool) - Show detailed output format
-* `out-format` (string) - Encoding file for output [available: text, json, xml, yaml] 
+* `out-format` (string) - Encoding output format [available: `text`, `json`, `xml`, `yaml`]
 * `native-out` (bool) - Native GOB output encoding format
 
 
